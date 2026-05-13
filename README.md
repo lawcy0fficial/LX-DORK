@@ -165,15 +165,17 @@ ARCHITECTURE PHILOSOPHY:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourhandle/lx-dork-pro.git
+git clone https://github.com/lawcy0fficial/LX-DORK.git
 
 # 2. Enter the tool folder
-cd lx-dork-pro/LX-DORK-PRO
+cd LX-DORK
 
 # 3. Open the tool
 #    Linux / macOS:
-open index.html
-xdg-open index.html    # Linux alternative
+chnod 777 start-lx-dork.sh
+
+# 4. to run
+bash start-lx-dork.sh
 
 #    Windows:
 start index.html

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LX-DORK PRO v2.0 — Enterprise Recon Framework</title>
+<link rel="stylesheet" href="lx-dork.css">
+</head>
+<body>
+<div class="root">
+
+<!-- CRT & VIGNETTE -->
+<div class="crt"></div>
+<div class="vig"></div>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<div class="hdr">
+  <span style="font-size:20px">💀</span>
+  <div class="logo">LX-DORK PRO</div>
+  <div class="ver">v2.0 // NEXT-GEN RECON FRAMEWORK</div>
+  <div class="hdr-pills">
+    <div class="pill pr"><span class="blink">●</span> ARMED</div>
+    <div class="pill pg" id="hp-tot">0 DORKS</div>
+    <div class="pill pc" id="hp-sel">0 SEL</div>
+    <div class="pill pp" id="hp-camp">NO SESSION</div>
+    <div class="pill py" id="hp-scope">0 TARGETS</div>
+    <div class="pill pt">AUTHORIZED USE ONLY</div>
+  </div>
+  <div style="display:flex;gap:5px;align-items:center">
+    <div style="font-family:var(--vt);font-size:11px;color:var(--blood);letter-spacing:1px">
+      TARGET:
+    </div>
+    <input id="global-target" class="inp" style="width:180px;font-size:10px"
+           placeholder="target.com" title="Global target domain — applied to all dork queries">
+  </div>
+</div>
+
+<!-- DISCLAIMER -->
+<div class="disc">
+  ☠ AUTHORIZED PENETRATION TESTING ONLY — Written scope required. Unauthorized use violates CFAA / Computer Misuse Act / GDPR. All activity logged. ☠
+</div>
+
+<!-- ═══════════════ TABS ═══════════════ -->
+<div class="tabs">
+  <div class="tab on"  onclick="showTab('dorks',this)">💀 DORK CONSOLE</div>
+  <div class="tab"     onclick="showTab('browser',this)">🌐 RECON BROWSER</div>
+  <div class="tab"     onclick="showTab('wordlist',this)">📦 WORDLIST MGR</div>
+  <div class="tab"     onclick="showTab('campaign',this)">📁 CAMPAIGNS</div>
+  <div class="tab"     onclick="showTab('scope',this)">🎯 SCOPE MGR</div>
+  <div class="tab"     onclick="showTab('builder',this)">🔧 DORK BUILDER</div>
+  <div class="tab"     onclick="showTab('report',this)">📋 REPORT FORGE</div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="stat-row">
+  <span>DORKS: <span class="sv" id="sb-tot">0</span></span>
+  <span>SEL: <span class="sg" id="sb-sel">0</span></span>
+  <span>CRIT: <span class="sv" id="sb-crit">0</span></span>
+  <span>HIGH: <span class="sv" id="sb-high">0</span></span>
+  <span>FILTERED: <span class="sy" id="sb-filt">0</span></span>
+  <span style="margin-left:auto">SESSION: <span class="sg" id="sb-sess">NONE</span></span>
+  <span>SCOPE IN: <span class="sg" id="sb-sin">0</span></span>
+  <span>SCOPE OUT: <span class="sv" id="sb-sout">0</span></span>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANELS
+═══════════════════════════════════════════ -->
+<div class="panels">
+
+<!-- ══════ DORK CONSOLE ══════ -->
+<div class="panel on" id="panel-dorks">
+<div class="dork-layout">
+
+  <!-- Sidebar: categories + risk -->
+  <div class="sb">
+    <div class="sh">▸ CATEGORIES</div>
+    <button class="cb ac" onclick="setCat('all')" id="cb-all">
+      <span class="ci">⬛</span>ALL<span class="cc" id="cc-all">0</span>
+    </button>
+    <div id="catlist"></div>
+
+    <div class="sh" style="margin-top:6px">▸ RISK</div>
+    <button class="cb" onclick="setRisk('critical')">
+      <span class="ci" style="color:var(--red)">◈</span>CRITICAL<span class="cc" id="rc-c">0</span>
+    </button>
+    <button class="cb" onclick="setRisk('high')">
+      <span class="ci" style="color:var(--orange)">◈</span>HIGH<span class="cc" id="rc-h">0</span>
+    </button>
+    <button class="cb" onclick="setRisk('medium')">
+      <span class="ci" style="color:var(--yellow)">◈</span>MEDIUM<span class="cc" id="rc-m">0</span>
+    </button>
+    <button class="cb" onclick="setRisk('low')">
+      <span class="ci" style="color:var(--cyan)">◈</span>LOW<span class="cc" id="rc-l">0</span>
+    </button>
+
+    <div class="sh" style="margin-top:6px">▸ QUICK SELECT</div>
+    <button class="cb" onclick="selAll()">    <span class="ci">✓</span>SEL ALL VISIBLE</button>
+    <button class="cb" onclick="selCrit()">   <span class="ci" style="color:var(--red)">💀</span>SEL CRITICAL</button>
+    <button class="cb" onclick="selHigh()">   <span class="ci" style="color:var(--orange)">⚠</span>SEL CRIT+HIGH</button>
+    <button class="cb" onclick="selNone()">   <span class="ci">○</span>CLEAR SELECTION</button>
+
+    <div class="sh" style="margin-top:6px">▸ ACTIONS</div>
+    <button class="cb" onclick="addToSession()">   <span class="ci" style="color:var(--purple)">+</span>ADD TO SESSION</button>
+    <button class="cb" onclick="launchSelected()"> <span class="ci" style="color:var(--orange)">▶</span>LAUNCH SELECTED</button>
+    <button class="cb" onclick="launchInBrowser()"><span class="ci" style="color:var(--teal)">🌐</span>OPEN IN BROWSER</button>
+    <button class="cb" onclick="exportSelected()"> <span class="ci" style="color:var(--yellow)">⬇</span>EXPORT SELECTED</button>
+  </div>
+
+  <!-- Main dork area -->
+  <div class="dmain">
+
+    <!-- Toolbar -->
+    <div class="tb">
+      <div>
+        <div class="lbl">SESSION</div>
+        <div style="display:flex;gap:5px">
+          <select class="inp" id="sess-sel" onchange="switchSession()" style="flex:1">
+            <option value="">-- select session --</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <div class="lbl">ENGINE</div>
+        <select class="inp" id="search-engine">
+          <option value="google">Google</option>
+          <option value="bing">Bing</option>
+          <option value="duckduckgo">DuckDuckGo</option>
+          <option value="shodan">Shodan</option>
+        </select>
+      </div>
+      <div>
+        <div class="lbl">SORT</div>
+        <select class="inp" id="sort-mode" onchange="renderDorks()">
+          <option value="risk">By Risk</option>
+          <option value="cat">By Category</option>
+          <option value="name">By Name</option>
+        </select>
+      </div>
+      <div>
+        <div class="lbl">VIEW</div>
+        <select class="inp" id="view-mode" onchange="renderDorks()">
+          <option value="grid">Grid</option>
+          <option value="list">Compact</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Search row -->
+    <div class="sr">
+      <span style="color:var(--blood);font-family:var(--vt);font-size:14px">⌕</span>
+      <input class="si" id="dork-search" placeholder="search dorks, descriptions, queries...">
+      <div class="fbs">
+        <button class="fb" onclick="setFilter('all',this)">ALL</button>
+        <button class="fb" onclick="setFilter('critical',this)">CRIT</button>
+        <button class="fb" onclick="setFilter('high',this)">HIGH</button>
+      </div>
+    </div>
+
+    <!-- Dork card grid -->
+    <div class="grid" id="dork-grid">
+      <div class="nr">// LOADING DORK DATABASE...</div>
+    </div>
+
+    <!-- Query preview -->
+    <div class="bp">
+      <div class="ql">▸ QUERY PREVIEW</div>
+      <div class="qb" id="dork-preview">// select a dork to preview the generated query</div>
+      <div class="btnrow">
+        <button class="btn br"  onclick="launchSelected()">💀 LAUNCH ALL SEL</button>
+        <button class="btn bt"  onclick="launchInBrowser()">🌐 IN BROWSER</button>
+        <button class="btn bc"  onclick="copyQuery()">⎘ COPY QUERY</button>
+        <button class="btn bg"  onclick="addToSession()">+ SESSION</button>
+        <button class="btn by"  onclick="exportSelected()">⬇ EXPORT</button>
+        <span class="si2" id="si2-count">0 SELECTED</span>
+      </div>
+    </div>
+
+  </div><!-- /dmain -->
+</div><!-- /dork-layout -->
+</div><!-- /panel-dorks -->
+
+<!-- ══════ INTEGRATED BROWSER ══════ -->
+<div class="panel" id="panel-browser">
+<div class="browser-layout">
+
+  <!-- Browser quick-launch bar -->
+  <div class="browser-quick-bar">
+    <span style="font-family:var(--vt);font-size:11px;color:var(--blood);letter-spacing:2px">QUICK SEARCH:</span>
+    <button class="btn bc" onclick="browserQuickSearch('site:'+document.getElementById('global-target').value)">site: target</button>
+    <button class="btn bc" onclick="browserQuickSearch('inurl:admin site:'+document.getElementById('global-target').value)">admin panel</button>
+    <button class="btn bc" onclick="browserQuickSearch('site:'+document.getElementById('global-target').value+' ext:env')">env files</button>
+    <button class="btn bc" onclick="browserQuickSearch('site:'+document.getElementById('global-target').value+' intitle:\"index of\"')">dir listing</button>
+    <button class="btn bc" onclick="browserQuickSearch('site:github.com '+document.getElementById('global-target').value)">github</button>
+    <button class="btn bc" onclick="browserQuickSearch('site:pastebin.com '+document.getElementById('global-target').value+' password')">pastebin</button>
+    <button class="btn by" onclick="browserQuickSearch('shodan.io/search?query=hostname:'+document.getElementById('global-target').value)">Shodan</button>
+    <button class="btn br" onclick="browserQuickSearch('site:'+document.getElementById('global-target').value+' intext:\"api_key\" OR intext:\"secret\"')">secrets</button>
+  </div>
+
+  <!-- Nav bar -->
+  <div class="browser-nav">
+    <button class="browser-ctrl-btn" onclick="browserBack()" title="Back">◀</button>
+    <button class="browser-ctrl-btn" onclick="browserForward()" title="Forward">▶</button>
+    <button class="browser-ctrl-btn" onclick="browserRefresh()" title="Refresh">↺</button>
+    <input id="browser-url-bar" class="browser-url-bar"
+           placeholder="Enter URL or press Enter to navigate..."
+           onkeydown="if(event.key==='Enter')browserNav()">
+    <button class="btn bc"  onclick="browserNav()">GO</button>
+    <button class="btn bgh" onclick="browserOpenUrl()" title="Open in new window">↗</button>
+    <button class="btn bg"  onclick="openBrowserTab('','New Tab')">+ TAB</button>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="browser-tabs-bar" id="browser-tabs-bar"></div>
+
+  <!-- Frame -->
+  <div class="browser-frame-wrap">
+    <iframe id="browser-frame" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" style="display:none"></iframe>
+    <div class="browser-placeholder" id="browser-placeholder">
+      <div class="browser-placeholder-logo">LX-DORK</div>
+      <div style="font-family:var(--vt);font-size:14px;color:var(--muted);letter-spacing:2px">INTEGRATED RECON BROWSER</div>
+      <div style="font-size:9px;color:var(--muted);text-align:center;max-width:400px;line-height:1.8">
+        Enter a URL above, use quick-search buttons, or launch dorks from the DORK CONSOLE tab.<br>
+        NOTE: Some sites block iframe embedding due to X-Frame-Options. Use ↗ to open externally.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px">
+        <button class="btn bc" onclick="browserNav()">NAVIGATE</button>
+        <button class="btn br" onclick="browserQuickSearch('site:'+document.getElementById('global-target').value)">GOOGLE TARGET</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="browser-status">
+    <span>STATUS:</span>
+    <span id="browser-status-text" style="color:var(--cyan)">Ready</span>
+    <span style="margin-left:auto;font-size:8px;color:var(--muted)">
+      Some sites block iframe. Use ↗ to open in browser window.
+    </span>
+  </div>
+
+</div>
+</div><!-- /panel-browser -->
+
+<!-- ══════ WORDLIST MANAGER ══════ -->
+<div class="panel" id="panel-wordlist">
+<div class="wl-layout">
+
+  <!-- Sidebar -->
+  <div class="wl-sb">
+    <div class="sec">▸ CATEGORIES</div>
+    <div id="wl-sidebar"></div>
+    <div class="sec" style="margin-top:10px">▸ SOURCES</div>
+    <div style="font-size:8px;color:var(--muted);line-height:1.8">
+      <div style="color:var(--teal)">• danielmiessler/SecLists</div>
+      <div style="color:var(--teal)">• payloadbox/xss-payload-list</div>
+      <div style="color:var(--teal)">• payloadbox/sql-injection-payload-list</div>
+      <div style="color:var(--teal)">• n0kovo/n0kovo_subdomains</div>
+      <div style="color:var(--teal)">• BullsEye0/google_dork_list</div>
+    </div>
+    <div class="sec" style="margin-top:10px">▸ ACTIONS</div>
+    <button class="btn bt full-w" style="margin-bottom:4px" onclick="fetchAllVisible()">⬇ FETCH ALL VISIBLE</button>
+    <div style="font-size:8px;color:var(--muted);margin-top:4px;line-height:1.6">
+      Note: CORS policy may block direct fetch from browser. Use URL copy to download via curl/wget in terminal, or use the bash installer script.
+    </div>
+  </div>
+
+  <!-- Wordlist content -->
+  <div class="wl-main">
+    <div class="wl-toolbar">
+      <span style="font-family:var(--vt);font-size:13px;color:var(--blood);letter-spacing:2px">▸ WORDLIST DATABASE</span>
+      <span style="font-size:9px;color:var(--muted)" id="wl-count"></span>
+      <button class="btn bt" onclick="fetchAllVisible()">⬇ FETCH VISIBLE</button>
+      <button class="btn bc" onclick="copyWLUrl(0)">⎘ COPY URL</button>
+    </div>
+    <div class="wl-content" id="wl-content"></div>
+  </div>
+
+</div>
+</div><!-- /panel-wordlist -->
+
+<!-- ══════ CAMPAIGNS ══════ -->
+<div class="panel" id="panel-campaign">
+<div class="camp-layout">
+
+  <!-- Sidebar -->
+  <div class="camp-sb">
+    <div class="sec">▸ NEW SESSION</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div><div class="lbl">SESSION NAME</div>
+        <input class="inp" id="new-sess-name" placeholder="e.g. ACME-EXT-Q1">
+      </div>
+      <div><div class="lbl">TARGET DOMAIN</div>
+        <input class="inp" id="new-sess-target" placeholder="target.com">
+      </div>
+      <div><div class="lbl">TESTER HANDLE</div>
+        <input class="inp" id="new-sess-tester" placeholder="@handle">
+      </div>
+      <div><div class="lbl">ENGAGEMENT TYPE</div>
+        <select class="inp" id="new-sess-eng">
+          <option>External Pentest</option>
+          <option>Internal Pentest</option>
+          <option>Red Team</option>
+          <option>Bug Bounty</option>
+          <option>OSINT Recon</option>
+          <option>Web App Pentest</option>
+          <option>Cloud Security Review</option>
+          <option>Supply Chain Assessment</option>
+        </select>
+      </div>
+      <button class="btn bg full-w" onclick="createSession()">+ CREATE SESSION</button>
+    </div>
+
+    <div class="sec" style="margin-top:12px">▸ SAVED SESSIONS</div>
+    <div id="sess-list" style="display:flex;flex-direction:column;gap:4px"></div>
+  </div>
+
+  <!-- Main -->
+  <div class="camp-main" id="camp-main">
+    <div style="font-family:var(--vt);font-size:18px;color:var(--muted);letter-spacing:2px;text-align:center;margin-top:40px">
+      // CREATE OR SELECT A SESSION
+    </div>
+  </div>
+
+</div>
+</div><!-- /panel-campaign -->
+
+<!-- ══════ SCOPE MANAGER ══════ -->
+<div class="panel" id="panel-scope">
+<div class="scope-layout">
+
+  <div class="scope-box">
+    <div class="sec">▸ IN-SCOPE TARGETS</div>
+    <div style="display:flex;gap:5px">
+      <input class="inp" id="in-scope-inp" placeholder="target.com / 192.168.1.0/24 / *.target.com" style="flex:1">
+      <button class="btn bg" onclick="addScope('in')">ADD</button>
+    </div>
+    <div class="scope-list" id="in-scope-list"></div>
+    <div style="font-size:8px;color:var(--muted);margin-top:4px">● Targets authorized for testing</div>
+  </div>
+
+  <div class="scope-box">
+    <div class="sec">▸ OUT-OF-SCOPE</div>
+    <div style="display:flex;gap:5px">
+      <input class="inp" id="out-scope-inp" placeholder="admin.target.com / 10.0.0.1" style="flex:1">
+      <button class="btn br" onclick="addScope('out')">ADD</button>
+    </div>
+    <div class="scope-list" id="out-scope-list"></div>
+    <div style="font-size:8px;color:var(--muted);margin-top:4px">● DO NOT TEST — excluded by client</div>
+  </div>
+
+  <div class="scope-box" style="grid-column:1/-1">
+    <div class="sec">▸ ENGAGEMENT METADATA</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px">
+      <div><div class="lbl">CLIENT</div>
+        <input class="inp" id="scope-client" placeholder="Acme Corp">
+      </div>
+      <div><div class="lbl">ENGAGEMENT TYPE</div>
+        <select class="inp" id="scope-type">
+          <option>External Pentest</option><option>Internal Pentest</option>
+          <option>Red Team</option><option>Bug Bounty</option>
+          <option>OSINT Recon</option><option>Web App Pentest</option>
+          <option>Cloud Security Review</option>
+        </select>
+      </div>
+      <div><div class="lbl">START DATE</div>
+        <input class="inp" type="date" id="scope-date">
+      </div>
+      <div><div class="lbl">END DATE</div>
+        <input class="inp" type="date" id="scope-end">
+      </div>
+    </div>
+    <div class="lbl">RULES OF ENGAGEMENT / NOTES</div>
+    <textarea class="note-area" id="scope-notes" placeholder="No DoS testing. Working hours only (09:00–18:00). Notify client before testing prod. No social engineering..."></textarea>
+    <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">
+      <button class="btn bg"  onclick="toast('Scope saved in session','ok')">💾 SAVE</button>
+      <button class="btn by"  onclick="exportScope()">⬇ EXPORT TXT</button>
+      <button class="btn bdng" onclick="clearScope()">✗ CLEAR</button>
+    </div>
+  </div>
+
+</div>
+</div><!-- /panel-scope -->
+
+<!-- ══════ DORK BUILDER ══════ -->
+<div class="panel" id="panel-builder">
+<div class="builder-layout">
+
+  <!-- Build area -->
+  <div class="builder-box">
+    <div class="sec">▸ OPERATOR QUICK-INSERT</div>
+    <div class="op-grid" id="op-grid"></div>
+
+    <div class="sec" style="margin-top:8px">▸ BUILD QUERY</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+      <div><div class="lbl">OPERATOR</div>
+        <select class="inp" id="bld-op">
+          <option value="site:">site:</option>
+          <option value="inurl:">inurl:</option>
+          <option value="intitle:">intitle:</option>
+          <option value="intext:">intext:</option>
+          <option value="ext:">ext:</option>
+          <option value="filetype:">filetype:</option>
+          <option value="cache:">cache:</option>
+          <option value="link:">link:</option>
+          <option value="allintitle:">allintitle:</option>
+          <option value="allinurl:">allinurl:</option>
+          <option value="allintext:">allintext:</option>
+          <option value="OR ">OR</option>
+          <option value="AND ">AND</option>
+          <option value="-">NOT (-)</option>
+          <option value="&quot;&quot;">" " (exact)</option>
+          <option value="*">* (wildcard)</option>
+          <option value="AROUND(3) ">AROUND(N)</option>
+        </select>
+      </div>
+      <div><div class="lbl">VALUE</div>
+        <input class="inp" id="bld-val" placeholder="value..." oninput="previewBuild()">
+      </div>
+    </div>
+    <div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
+      <button class="btn bc"  onclick="appendOp()">+ APPEND</button>
+      <button class="btn bgh" onclick="clearBuild()">✗ CLEAR</button>
+      <button class="btn br"  onclick="launchBuilt()">💀 GOOGLE</button>
+      <button class="btn bt"  onclick="launchBuiltBrowser()">🌐 IN BROWSER</button>
+      <button class="btn by"  onclick="saveDork()">💾 SAVE</button>
+    </div>
+
+    <div class="lbl">LIVE PREVIEW</div>
+    <div class="builder-out" id="bld-out">// build your query...</div>
+    <button class="btn bc" onclick="copyBuilt()">⎘ COPY QUERY</button>
+  </div>
+
+  <!-- Reference + saved -->
+  <div class="builder-box" style="display:flex;flex-direction:column;gap:8px">
+    <div class="sec">▸ OPERATOR REFERENCE</div>
+    <div style="font-size:9px;line-height:2;color:var(--text)">
+      <div><span style="color:var(--cyan);font-family:var(--mono)">site:example.com</span> — restrict to domain</div>
+      <div><span style="color:var(--cyan);font-family:var(--mono)">inurl:admin</span> — keyword in URL</div>
+      <div><span style="color:var(--cyan);font-family:var(--mono)">intitle:"login"</span> — keyword in page title</div>
+      <div><span style="color:var(--cyan);font-family:var(--mono)">intext:"api_key"</span> — keyword in body</div>
+      <div><span style="color:var(--cyan);font-family:var(--mono)">ext:pdf</span> — file extension</div>
+      <div><span style="color:var(--cyan);font-family:var(--mono)">filetype:env</span> — file type filter</div>
+      <div><span style="color:var(--cyan);font-family:var(--mono)">-inurl:help</span> — exclude term</div>
+      <div><span style="color:var(--cyan);font-family:var(--mono)">"exact phrase"</span> — exact match</div>
+      <div><span style="color:var(--cyan);font-family:var(--mono)">term1 OR term2</span> — logical OR</div>
+      <div><span style="color:var(--cyan);font-family:var(--mono)">site:*.target.com</span> — wildcard subdomains</div>
+      <div><span style="color:var(--cyan);font-family:var(--mono)">cache:target.com</span> — cached page</div>
+      <div><span style="color:var(--cyan);font-family:var(--mono)">term1 AROUND(3) term2</span> — proximity</div>
+    </div>
+
+    <div class="sec" style="margin-top:4px">▸ SAVED CUSTOM DORKS</div>
+    <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:3px" id="saved-dorks-list">
+      <div style="font-size:9px;color:var(--muted)">// no saved dorks yet</div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /panel-builder -->
+
+<!-- ══════ REPORT FORGE ══════ -->
+<div class="panel" id="panel-report">
+<div class="report-layout">
+
+  <!-- Config sidebar -->
+  <div class="report-sb">
+    <div class="sec">▸ REPORT CONFIG</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div><div class="lbl">REPORT TITLE</div>
+        <input class="inp" id="rpt-title" value="OSINT Recon Report">
+      </div>
+      <div><div class="lbl">ANALYST</div>
+        <input class="inp" id="rpt-analyst" placeholder="handle / name">
+      </div>
+      <div><div class="lbl">CLIENT</div>
+        <input class="inp" id="rpt-client" placeholder="Acme Corp">
+      </div>
+      <div><div class="lbl">CLASSIFICATION</div>
+        <select class="inp" id="rpt-class">
+          <option>CONFIDENTIAL</option>
+          <option>TOP SECRET</option>
+          <option>RESTRICTED</option>
+          <option>INTERNAL</option>
+          <option>TLP:RED</option>
+          <option>TLP:AMBER</option>
+          <option>TLP:GREEN</option>
+          <option>UNCLASSIFIED</option>
+        </select>
+      </div>
+      <div><div class="lbl">SESSION / CAMPAIGN</div>
+        <select class="inp" id="rpt-sess">
+          <option value="">All findings</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sec" style="margin-top:10px">▸ INCLUDE IN REPORT</div>
+    <div style="display:flex;flex-direction:column;gap:5px;font-size:9px;color:var(--text)">
+      <label style="display:flex;align-items:center;gap:5px">
+        <input type="checkbox" id="rpt-inc-hits" checked> Include HITS detail
+      </label>
+      <label style="display:flex;align-items:center;gap:5px">
+        <input type="checkbox" id="rpt-inc-all"> Include misses list
+      </label>
+      <label style="display:flex;align-items:center;gap:5px">
+        <input type="checkbox" id="rpt-inc-scope" checked> Include scope
+      </label>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:5px;margin-top:10px">
+      <button class="btn br full-w" onclick="genReport()">⚡ GENERATE REPORT</button>
+      <button class="btn bg full-w" onclick="exportReport()">⬇ EXPORT MARKDOWN</button>
+      <button class="btn bc full-w" onclick="exportReportJSON()">⬇ EXPORT JSON</button>
+      <button class="btn bgh full-w" onclick="copyReport()">⎘ COPY</button>
+    </div>
+  </div>
+
+  <!-- Report output -->
+  <div class="report-main">
+    <div style="font-family:var(--vt);font-size:11px;color:var(--blood);letter-spacing:2px">▸ REPORT OUTPUT</div>
+    <div class="report-out" id="rpt-out">
+// Click GENERATE REPORT to compile findings into a professional report.
+//
+// The report will include:
+//   - Executive summary
+//   - Scope definition
+//   - Campaign hits with risk ratings and queries
+//   - Recommendations
+//   - Classification header
+//
+// Export as Markdown (.md) or JSON for integration with other tools.
+    </div>
+  </div>
+
+</div>
+</div><!-- /panel-report -->
+
+</div><!-- /panels -->
+</div><!-- /root -->
+
+<!-- ═══════════════ MODAL ═══════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modal-title">// MODAL</div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script src="lx-dork.js"></script>
+</body>
+</html>
